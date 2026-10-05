@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard</title>
+<style>
+  :root {
+    --green: #3DDC84;
+    --red: #E15B64;
+    --track: #E8E8E8;
+    --gray: #8E8E93;
+    --ink: #111111;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; }
+  body {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 18px 20px 96px;
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: #000;
+  }
+  .toggle {
+    display: flex;
+    background: #F2F2F4;
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .toggle button {
+    border: 0;
+    background: transparent;
+    width: 34px;
+    height: 28px;
+    border-radius: 999px;
+    font: 600 14px/1 inherit;
+    color: #666;
+    cursor: pointer;
+  }
+  .toggle button.on {
+    background: #fff;
+    color: #111;
+    box-shadow: 0 1px 2px rgba(0,0,0,.12);
+  }
+  .panel { display: none; }
+  .panel.on { display: block; }
+  .card {
+    background: #fff;
+    border: 1px solid #F0F0F0;
+    border-radius: 22px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.05);
+    padding: 18px 12px 16px;
+    text-align: center;
+  }
+  .ring {
+    position: relative;
+    width: 230px;
+    height: 230px;
+    margin: 0 auto;
+  }
+  .ring svg { display: block; width: 230px; height: 230px; }
+  .center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .amount {
+    color: var(--green);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .safe {
+    margin-top: 6px;
+    color: var(--gray);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .month {
+    margin: 4px 0 0;
+    color: #6E6E73;
+    font-size: 15px;
+  }
+  .cat { margin-top: 18px; }
+  .cat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .cat-name { font-size: 16px; font-weight: 650; }
+  .cat-sub { margin-top: 2px; color: var(--gray); font-size: 13px; }
+  .cat-amt { color: var(--red); font-size: 16px; font-weight: 650; }
+  .bar {
+    height: 4px;
+    margin-top: 8px;
+    background: #F1F1F1;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .bar > span {
+    display: block;
+    height: 100%;
+    background: var(--red);
+    border-radius: 99px;
+  }
+  .fine {
+    margin: 18px 0 0;
+    color: var(--gray);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #F2F2F2;
+    font-size: 16px;
+  }
+  .row .name { font-weight: 600; }
+  .row .sub {
+    display: block;
+    margin-top: 2px;
+    color: var(--gray);
+    font-size: 12px;
+    font-weight: 450;
+  }
+  .row .amt { font-weight: 650; white-space: nowrap; }
+  .row.total .name, .row.total .amt { font-weight: 750; }
+  .hero {
+    margin: 0 0 8px;
+    font-size: 34px;
+    font-weight: 750;
+    letter-spacing: -0.8px;
+  }
+  .sum {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 15px;
+  }
+  .sum span { color: var(--gray); }
+  .tx {
+    display: grid;
+    grid-template-columns: 58px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #F2F2F2;
+  }
+  .when { color: var(--gray); font-size: 13px; }
+  .tx .name { font-weight: 600; font-size: 16px; }
+  .meta { margin-top: 3px; display: flex; gap: 6px; align-items: center; }
+  .pend {
+    display: inline-block;
+    color: #8A5A00;
+    background: #FFF4DE;
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .yearly { color: var(--gray); font-size: 12px; }
+  .tx .amt { font-weight: 650; font-size: 15px; }
+  nav {
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    background: #fff;
+    border-top: 1px solid #EEEEEE;
+    padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
+    z-index: 2;
+  }
+  nav button {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: #8E8E93;
+    font: 500 11px/1.1 inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  nav button.on { color: var(--green); font-weight: 700; }
+  nav button.on svg { fill: currentColor; stroke: currentColor; }
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="title">Dashboard</h1>
+    <div class="toggle" id="toggle" role="group" aria-label="Paychecks">
+      <button type="button" class="on" data-pay="4" aria-pressed="true">4</button>
+      <button type="button" data-pay="5" aria-pressed="false">5</button>
+    </div>
+  </header>
+
+  <section id="home" class="panel on">
+    <div class="card">
+      <div class="ring">
+        <svg viewBox="0 0 220 220" aria-hidden="true">
+          <circle cx="110" cy="110" r="86" fill="none" stroke="#E8E8E8" stroke-width="14"></circle>
+          <circle cx="110" cy="110" r="86" fill="none" stroke="#3DDC84" stroke-width="14" stroke-linecap="round" stroke-dasharray="378.25 162.11" transform="rotate(-90 110 110)"></circle>
+        </svg>
+        <div class="center">
+          <div class="amount" id="sts">$1,435</div>
+          <div class="safe">Safe-to-Spend</div>
+        </div>
+      </div>
+      <p class="month">October</p>
+    </div>
+    <div id="cats"></div>
+    <p class="fine">Card balance $3,190.09 is not in safe-to-spend.</p>
+  </section>
+
+  <section id="budget" class="panel">
+    <div class="row"><div><span class="name">Housing</span></div><span class="amt">$850</span></div>
+    <div class="row"><div><span class="name">ChatGPT</span></div><span class="amt">$100</span></div>
+    <div class="row"><div><span class="name">Visible</span></div><span class="amt">$25</span></div>
+    <div class="row total"><div><span class="name">Total</span></div><span class="amt">$975</span></div>
+    <div class="row"><div><span class="name">Cursor</span><span class="sub">yearly on Oct 3</span></div><span class="amt">$192</span></div>
+    <div class="row"><div><span class="name">MasterClass</span><span class="sub">through Sep 7, 2027</span></div><span class="amt">$64.20</span></div>
+    <p class="fine">Canceled Meshy, Adobe Stock, Claude Pro, ElevenLabs, Runway.</p>
+    <p class="fine">ButcherBox $182.58 on Sep 30 is not monthly. Chase monthly amount unknown. About $712 was two late payments.</p>
+  </section>
+
+  <section id="activity" class="panel">
+    <div id="txs"></div>
+    <p class="fine">Sep 4 to Oct 4 charges $2,757.50, $373.58 still pending. $1,743.84 on Sep 16 was a payment.</p>
+  </section>
+
+  <section id="accounts" class="panel">
+    <p class="hero">$6,170.47</p>
+    <div class="sum"><span>Net worth</span><strong>$6,170.47</strong></div>
+    <div class="sum"><span>Cash</span><strong>$1,687.42</strong></div>
+    <div class="sum"><span>Investments</span><strong>$7,673.14</strong></div>
+    <div class="sum"><span>Card</span><strong>$3,190.09 owed</strong></div>
+    <div class="row"><div><span class="name">Checking 3478</span></div><span class="amt">$0</span></div>
+    <div class="row"><div><span class="name">Savings 7519</span></div><span class="amt">$1,687.42</span></div>
+    <div class="row"><div><span class="name">Roth 5060</span></div><span class="amt">$7,455.64</span></div>
+    <div class="row"><div><span class="name">Managed brokerage 3018</span></div><span class="amt">$217.50</span></div>
+    <div class="row"><div><span class="name">Other brokerage and crypto</span></div><span class="amt">$0</span></div>
+    <div class="row"><div><span class="name">Card 6091</span></div><span class="amt">$3,190.09</span></div>
+    <p class="fine">Only Robinhood is linked. No due date.</p>
+  </section>
+
+  <nav>
+    <button type="button" class="on" data-tab="home">
+      <svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"></path></svg>
+      Home
+    </button>
+    <button type="button" data-tab="budget">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v8M9 10.5c.6-.8 1.5-1.2 3-1.2 1.8 0 3 .8 3 2.1S13.8 13.4 12 13.4s-3 .8-3 2.1 1.2 2.1 3 2.1c1.5 0 2.4-.4 3-1.2"></path></svg>
+      Budget
+    </button>
+    <button type="button" data-tab="activity">
+      <svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h10"></path></svg>
+      Activity
+    </button>
+    <button type="button" data-tab="accounts">
+      <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"></rect><path d="M3 10h18"></path></svg>
+      Accounts
+    </button>
+  </nav>
+
+<script>
+(function () {
+  var income = { "4": 3076, "5": 3845 };
+  var bills = 975;
+  var groceries = 666;
+  var pay = "4";
+  var cats = [
+    { name: "Shopping", amount: 512.93 },
+    { name: "Groceries", amount: 665.67 },
+    { name: "Gas and car", amount: 708.59 },
+    { name: "Eating out", amount: 313.23 }
+  ];
+  var txs = [
+    { date: "Oct 4", name: "Steam", amount: 42.76, pending: true },
+    { date: "Oct 4", name: "DoorDash", amount: 43.11, pending: true },
+    { date: "Oct 4", name: "Steam", amount: 9.50, pending: true },
+    { date: "Oct 3", name: "OpenAI", amount: 5.03, pending: true },
+    { date: "Oct 3", name: "Cursor", amount: 192.00, pending: true, yearly: true },
+    { date: "Oct 2", name: "Interest", amount: 1.09, pending: false },
+    { date: "Oct 2", name: "Shell", amount: 46.66, pending: true },
+    { date: "Oct 2", name: "Shell", amount: 22.41, pending: true },
+    { date: "Oct 2", name: "Publix", amount: 12.11, pending: true },
+    { date: "Oct 1", name: "Publix", amount: 3.20, pending: false },
+    { date: "Oct 1", name: "Publix", amount: 15.40, pending: false },
+    { date: "Sep 30", name: "ButcherBox", amount: 182.58, pending: false }
+  ];
+
+  function dollars(n) {
+    return "$" + Math.round(n).toLocaleString("en-US");
+  }
+  function cents(n) {
+    return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  var max = cats.reduce(function (m, row) { return Math.max(m, row.amount); }, 0);
+  document.getElementById("cats").innerHTML = cats.map(function (row) {
+    var width = (row.amount / max) * 100;
+    return '<div class="cat"><div class="cat-top"><div><div class="cat-name">' + row.name +
+      '</div><div class="cat-sub">Last month</div></div><div class="cat-amt">-' + cents(row.amount) +
+      '</div></div><div class="bar"><span style="width:' + width.toFixed(2) + '%"></span></div></div>';
+  }).join("");
+
+  document.getElementById("txs").innerHTML = txs.map(function (row) {
+    var tags = "";
+    if (row.pending) tags += '<span class="pend">Pending</span>';
+    if (row.yearly) tags += '<span class="yearly">yearly</span>';
+    var meta = tags ? '<div class="meta">' + tags + '</div>' : '';
+    return '<div class="tx"><div class="when">' + row.date + '</div><div><div class="name">' + row.name +
+      '</div>' + meta + '</div><div class="amt">' + cents(row.amount) + '</div></div>';
+  }).join("");
+
+  function showSafe() {
+    document.getElementById("sts").textContent = dollars(income[pay] - bills - groceries);
+  }
+  showSafe();
+
+  document.getElementById("toggle").addEventListener("click", function (event) {
+    var button = event.target.closest("[data-pay]");
+    if (!button) return;
+    pay = button.getAttribute("data-pay");
+    document.querySelectorAll("#toggle button").forEach(function (item) {
+      var on = item === button;
+      item.classList.toggle("on", on);
+      item.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    showSafe();
+  });
+
+  var titles = { home: "Dashboard", budget: "Budget", activity: "Activity", accounts: "Accounts" };
+  document.querySelector("nav").addEventListener("click", function (event) {
+    var button = event.target.closest("[data-tab]");
+    if (!button) return;
+    var id = button.getAttribute("data-tab");
+    document.querySelectorAll(".panel").forEach(function (panel) {
+      panel.classList.toggle("on", panel.id === id);
+    });
+    document.querySelectorAll("nav button").forEach(function (item) {
+      item.classList.toggle("on", item === button);
+    });
+    document.getElementById("title").textContent = titles[id];
+    document.getElementById("toggle").hidden = id !== "home";
+  });
+})();
+</script>
+</body>
+</html>
